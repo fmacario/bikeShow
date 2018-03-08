@@ -51,8 +51,8 @@
             android:layout_width="0dp"
             android:layout_height="300dp"
             android:layout_gravity="center"
-            app:layout_constraintTop_toBottomOf="@+id/guideline"
-            app:layout_constraintBottom_toBottomOf="parent">
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/guideline">
 
             <fragment
                 android:id="@+id/map"

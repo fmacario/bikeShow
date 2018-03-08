@@ -156,4 +156,9 @@ public class mainActivity extends FragmentActivity implements IBaseGpsListener, 
     public void onGpsStatusChanged(int event) {
 
     }
+
+    @Override
+    public void onBackPressed() {
+        moveTaskToBack(false);
+    }
 }
