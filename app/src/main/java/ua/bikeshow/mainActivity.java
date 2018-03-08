@@ -3,10 +3,12 @@ package ua.bikeshow;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -14,7 +16,17 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.ImageButton;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMapOptions;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.Console;
 import java.util.Formatter;
@@ -24,15 +36,28 @@ import java.util.Locale;
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
-public class mainActivity extends AppCompatActivity implements IBaseGpsListener {
+//public class mainActivity extends AppCompatActivity implements IBaseGpsListener, OnMapReadyCallback {
+public class mainActivity extends FragmentActivity implements IBaseGpsListener, OnMapReadyCallback {
+    private GoogleMap googleMap = null;
     TextView speed;
     String speed_units = "km/h";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_main);
+
+        ImageButton settings = (ImageButton)findViewById(R.id.settings);
+        settings.setOnClickListener(new View.OnClickListener()   {
+            public void onClick(View v)  {
+                try {
+                    Intent i = new Intent(getApplicationContext(),SettingsActivity.class);
+                    startActivity(i);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
 
         speed = (TextView)findViewById(R.id.speed);
 
@@ -52,6 +77,10 @@ public class mainActivity extends AppCompatActivity implements IBaseGpsListener 
         this.updateSpeed(null);
 
         speed.setText("0 " + speed_units);
+
+        MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+
     }
 
     private void updateSpeed(CLocation location) {
@@ -76,7 +105,28 @@ public class mainActivity extends AppCompatActivity implements IBaseGpsListener 
         }
 */
         speed.setText(strCurrentSpeed + " " + speed_units);
+/*
+        if ( googleMap != null ){
+         googleMap.addMarker(new MarkerOptions()
+                .position(new LatLng( location.getLatitude(), location.getLongitude()))
+                .title("Marker"));
+
+        }
+*/
     }
+
+    @Override
+    public void onMapReady(GoogleMap map) {
+        googleMap = map;
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        googleMap.setMyLocationEnabled(true);
+
+        googleMap.animateCamera( CameraUpdateFactory.zoomTo( 17.0f ) );
+
+    }
+
 
     @Override
     public void onLocationChanged(Location location) {

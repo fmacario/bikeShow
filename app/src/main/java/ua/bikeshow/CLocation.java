@@ -78,4 +78,14 @@ public class CLocation extends Location {
         }
         return nSpeed;
     }
+
+    @Override
+    public double getLatitude() {
+        return super.getLatitude();
+    }
+
+    @Override
+    public double getLongitude() {
+        return super.getLongitude();
+    }
 }
