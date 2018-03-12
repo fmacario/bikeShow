@@ -71,7 +71,7 @@ public class CLocation extends Location {
     public float getSpeed() {
         // TODO Auto-generated method stub
         float nSpeed = super.getSpeed();
-        if(!this.units.equals("km/h"))
+        if(this.units.equals("km/h"))
         {
             //Convert meters/second to km/hour
             nSpeed = nSpeed * 3.6f;

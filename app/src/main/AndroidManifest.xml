@@ -39,7 +39,18 @@
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
         <activity
             android:name=".SettingsActivity"
-            android:label="@string/title_activity_settings"></activity>
+            android:label="@string/title_activity_settings" />
+        <activity
+            android:name=".emergency"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_emergency"
+            android:theme="@style/FullscreenTheme" />
+        <activity
+            android:name=".Emergency"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_emergency"
+            android:theme="@style/FullscreenTheme" />
+        <activity android:name=".Settings"></activity>
     </application>
 
 </manifest>
