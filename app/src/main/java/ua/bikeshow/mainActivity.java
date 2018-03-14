@@ -18,6 +18,8 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.Formatter;
 import java.util.Locale;
@@ -28,8 +30,15 @@ import java.util.Locale;
  */
 //public class mainActivity extends AppCompatActivity implements IBaseGpsListener, OnMapReadyCallback {
 public class mainActivity extends FragmentActivity implements IBaseGpsListener, OnMapReadyCallback {
-    private GoogleMap googleMap = null;
+
+    Button emergency, start_stop;
     TextView speed;
+    ImageButton settings;
+    MapFragment mapFragment;
+
+    LocationManager locationManager;
+    GoogleMap googleMap = null;
+
     String speed_units = "km/h";
     boolean ss = false;
 
@@ -38,7 +47,51 @@ public class mainActivity extends FragmentActivity implements IBaseGpsListener, 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        ImageButton settings = (ImageButton)findViewById(R.id.settings);
+        initilaizeComponents();
+        initializeEvents();
+
+        //writeDB();
+
+        locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
+        this.updateSpeed(null);
+
+        mapFragment.getMapAsync(this);
+
+    }
+
+    private void writeDB() {
+        // Write a message to the database
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference root = database.getReference(); //Getting root reference
+        DatabaseReference session = root.child("session");
+
+        DatabaseReference inicio = session.child("2").child("inicio");
+        DatabaseReference fim = session.child("2").child("fim");
+        inicio.setValue("Ramona");
+        fim.setValue("UA");
+
+        DatabaseReference vel = session.child("2").child("min").child("1").child("vel");
+        DatabaseReference bat = session.child("2").child("min").child("1").child("bat");
+        //DatabaseReference bat = session.child("2").child("min").child("1").child("bat");
+        vel.setValue(40);
+        bat.setValue(60);
+    }
+
+    private void initilaizeComponents() {
+        emergency = (Button)findViewById(R.id.button_emergency);
+        start_stop = (Button)findViewById(R.id.start_stop);
+        settings = (ImageButton)findViewById(R.id.settings);
+        speed = (TextView)findViewById(R.id.speed);
+        mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
+    }
+
+
+    private void initializeEvents() {
         settings.setOnClickListener(new View.OnClickListener()   {
             public void onClick(View v)  {
                 try {
@@ -50,7 +103,6 @@ public class mainActivity extends FragmentActivity implements IBaseGpsListener, 
             }
         });
 
-        Button emergency = (Button)findViewById(R.id.button_emergency);
         emergency.setOnClickListener(new View.OnClickListener()   {
             public void onClick(View v)  {
                 try {
@@ -62,7 +114,6 @@ public class mainActivity extends FragmentActivity implements IBaseGpsListener, 
             }
         });
 
-        final Button start_stop = (Button)findViewById(R.id.start_stop);
         start_stop.setOnClickListener(new View.OnClickListener()   {
             public void onClick(View v)  {
                 try {
@@ -79,26 +130,9 @@ public class mainActivity extends FragmentActivity implements IBaseGpsListener, 
                 }
             }
         });
-
-        speed = (TextView)findViewById(R.id.speed);
-
-        LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
-        this.updateSpeed(null);
-
-        speed.setText("0 " + speed_units);
-
-        MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
-
     }
 
     private void updateSpeed(CLocation location) {
-        // TODO Auto-generated method stub
         float nCurrentSpeed = 0;
 
         if(location != null)
@@ -110,23 +144,13 @@ public class mainActivity extends FragmentActivity implements IBaseGpsListener, 
         Formatter fmt = new Formatter(new StringBuilder());
         fmt.format(Locale.US, "%5.1f", nCurrentSpeed);
         String strCurrentSpeed = fmt.toString();
-        //strCurrentSpeed = strCurrentSpeed.replace(' ', '0');
-
         /*
         if(this.useMetricUnits())
         {
             strUnits = "meters/second";
         }
-*/
+        */
         speed.setText(strCurrentSpeed + " " + speed_units);
-/*
-        if ( googleMap != null ){
-         googleMap.addMarker(new MarkerOptions()
-                .position(new LatLng( location.getLatitude(), location.getLongitude()))
-                .title("Marker"));
-
-        }
-*/
     }
 
     @Override
@@ -140,7 +164,6 @@ public class mainActivity extends FragmentActivity implements IBaseGpsListener, 
         googleMap.animateCamera( CameraUpdateFactory.zoomTo( 17.0f ) );
 
     }
-
 
     @Override
     public void onLocationChanged(Location location) {
