@@ -1,6 +1,13 @@
 package ua.bikeshow;
 
 import android.Manifest;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothGatt;
+import android.bluetooth.BluetoothGattCallback;
+import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattDescriptor;
+import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -9,10 +16,12 @@ import android.location.LocationManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -21,34 +30,43 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Formatter;
 import java.util.Locale;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 
-/**
- * An example full-screen activity that shows and hides the system UI (i.e.
- * status bar and navigation/system bar) with user interaction.
- */
-//public class mainActivity extends AppCompatActivity implements IBaseGpsListener, OnMapReadyCallback {
 public class mainActivity extends FragmentActivity implements IBaseGpsListener, OnMapReadyCallback {
 
     Button emergency, start_stop;
-    TextView speed;
+    TextView speed, bpm;
     ImageButton settings;
     MapFragment mapFragment;
 
     LocationManager locationManager;
     GoogleMap googleMap = null;
 
-    String speed_units = "km/h";
-    boolean ss = false;
+    BluetoothAdapter bluetoothAdapter;
+    BluetoothGatt bluetoothGatt;
+    BluetoothDevice bluetoothDevice;
+
+    final int TIME_SEG = 60;    // intervalo de tempo para leitura heart rate
+    String speed_units = "km/h", bt_address;
+    boolean ss = false, isListeningHeartRate = false, band_found = false, band_connected = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         initilaizeComponents();
         initializeEvents();
+
+        getBoundedDevice();
+
+        startConnecting();
 
         //writeDB();
 
@@ -62,6 +80,81 @@ public class mainActivity extends FragmentActivity implements IBaseGpsListener, 
 
         mapFragment.getMapAsync(this);
 
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.SECOND, 10);
+
+        if(band_connected) {
+            Timer myTimer = new Timer("MyTimer", true);
+            myTimer.schedule(new MyTask(), calendar.getTime(), TIME_SEG * 1000);
+        }
+    }
+
+    private class MyTask extends TimerTask {
+
+        public void run(){
+            if(band_connected)
+                startScanHeartRate();
+        }
+
+    }
+
+    void getBoundedDevice() {
+        Set<BluetoothDevice> boundedDevice = bluetoothAdapter.getBondedDevices();
+        for (BluetoothDevice bd : boundedDevice) {
+            if (bd.getName().contains("MI Band 2")) {
+                bt_address = bd.getAddress();
+                band_found = true;
+                bpm.setText("FOUND");
+            }
+        }
+        band_found = false;
+    }
+
+    void startConnecting() {
+        bluetoothDevice = bluetoothAdapter.getRemoteDevice(bt_address);
+        bluetoothGatt = bluetoothDevice.connectGatt(this, true, bluetoothGattCallback);
+    }
+
+    void stateConnected() {
+        bluetoothGatt.discoverServices();
+        band_connected = true;
+    }
+
+    void stateDisconnected() {
+        bluetoothGatt.disconnect();
+        band_connected = false;
+    }
+
+    void startScanHeartRate() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                bpm.setText("...");
+            }
+        });
+
+        BluetoothGattCharacteristic bchar = bluetoothGatt.getService(CustomBluetoothProfile.HeartRate.service)
+                .getCharacteristic(CustomBluetoothProfile.HeartRate.controlCharacteristic);
+        bchar.setValue(new byte[]{21, 2, 1});
+        bluetoothGatt.writeCharacteristic(bchar);
+    }
+
+    void listenHeartRate() {
+        BluetoothGattCharacteristic bchar = bluetoothGatt.getService(CustomBluetoothProfile.HeartRate.service)
+                .getCharacteristic(CustomBluetoothProfile.HeartRate.measurementCharacteristic);
+        bluetoothGatt.setCharacteristicNotification(bchar, true);
+        BluetoothGattDescriptor descriptor = bchar.getDescriptor(CustomBluetoothProfile.HeartRate.descriptor);
+        descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+        bluetoothGatt.writeDescriptor(descriptor);
+        isListeningHeartRate = true;
+    }
+
+    void getBatteryStatus() {
+        BluetoothGattCharacteristic bchar = bluetoothGatt.getService(CustomBluetoothProfile.Basic.service)
+                .getCharacteristic(CustomBluetoothProfile.Basic.batteryCharacteristic);
+        if (!bluetoothGatt.readCharacteristic(bchar)) {
+            Toast.makeText(this, "Failed get battery info", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void writeDB() {
@@ -87,9 +180,9 @@ public class mainActivity extends FragmentActivity implements IBaseGpsListener, 
         start_stop = (Button)findViewById(R.id.start_stop);
         settings = (ImageButton)findViewById(R.id.settings);
         speed = (TextView)findViewById(R.id.speed);
+        bpm = (TextView)findViewById(R.id.bpm);
         mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
     }
-
 
     private void initializeEvents() {
         settings.setOnClickListener(new View.OnClickListener()   {
@@ -198,4 +291,89 @@ public class mainActivity extends FragmentActivity implements IBaseGpsListener, 
     public void onBackPressed() {
         moveTaskToBack(false);
     }
+
+    final BluetoothGattCallback bluetoothGattCallback = new BluetoothGattCallback() {
+
+        @Override
+        public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
+            super.onConnectionStateChange(gatt, status, newState);
+            Log.v("test", "onConnectionStateChange");
+
+            if (newState == BluetoothProfile.STATE_CONNECTED) {
+                stateConnected();
+            } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
+                stateDisconnected();
+            }
+
+        }
+
+        @Override
+        public void onServicesDiscovered(BluetoothGatt gatt, int status) {
+            super.onServicesDiscovered(gatt, status);
+            Log.v("test", "onServicesDiscovered");
+            listenHeartRate();
+        }
+
+        @Override
+        public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
+            super.onCharacteristicRead(gatt, characteristic, status);
+            Log.v("test", "onCharacteristicRead");
+            byte[] data = characteristic.getValue();
+            //bpm.setText(Arrays.toString(data));
+        }
+
+        @Override
+        public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
+            super.onCharacteristicWrite(gatt, characteristic, status);
+            Log.v("test", "onCharacteristicWrite");
+        }
+
+        @Override
+        public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
+            super.onCharacteristicChanged(gatt, characteristic);
+            Log.v("test", "onCharacteristicChanged");
+            byte[] data = characteristic.getValue();
+            String s = Arrays.toString(data);
+            String[] parts = s.split(", ");
+            final String[] parts2 = parts[1].split("]");
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    bpm.setText(parts2[0] + " BPM");
+                }
+            });
+        }
+
+        @Override
+        public void onDescriptorRead(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
+            super.onDescriptorRead(gatt, descriptor, status);
+            Log.v("test", "onDescriptorRead");
+        }
+
+        @Override
+        public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
+            super.onDescriptorWrite(gatt, descriptor, status);
+            Log.v("test", "onDescriptorWrite");
+        }
+
+        @Override
+        public void onReliableWriteCompleted(BluetoothGatt gatt, int status) {
+            super.onReliableWriteCompleted(gatt, status);
+            Log.v("test", "onReliableWriteCompleted");
+        }
+
+        @Override
+        public void onReadRemoteRssi(BluetoothGatt gatt, int rssi, int status) {
+            super.onReadRemoteRssi(gatt, rssi, status);
+            Log.v("test", "onReadRemoteRssi");
+        }
+
+        @Override
+        public void onMtuChanged(BluetoothGatt gatt, int mtu, int status) {
+            super.onMtuChanged(gatt, mtu, status);
+            Log.v("test", "onMtuChanged");
+        }
+
+    };
+
 }

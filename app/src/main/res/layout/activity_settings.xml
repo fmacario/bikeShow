@@ -1,11 +1,237 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/colorPrimary"
+    android:padding="10dp"
     tools:context="ua.bikeshow.Settings">
 
+    <LinearLayout
+        android:id="@+id/layout_BACK"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
+        <ImageButton
+            android:id="@+id/backToMain"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left"
+            app:srcCompat="?attr/actionModeCloseDrawable" />
+    </LinearLayout>
 
-</android.support.constraint.ConstraintLayout>
+    <LinearLayout
+        android:id="@+id/layout_UNITS"
+        android:layout_marginTop="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Units"
+            android:textSize="25dp"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layout_UNITS1"
+        android:layout_marginVertical="5dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:text="\t\tTemperature"
+            android:textSize="20dp"
+            android:layout_weight="0.5"/>
+
+        <TextView
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:text="ºC"
+            android:textSize="15dp"
+            android:gravity="right"
+            android:layout_weight="0.2"/>
+
+        <Switch
+            android:id="@+id/units_temperature"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.1"
+            android:gravity="center"/>
+
+        <TextView
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:text="ºF"
+            android:textSize="15dp"
+            android:layout_weight="0.2"
+            android:gravity="left"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layout_UNITS2"
+        android:layout_marginVertical="5dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:text="\t\tSpeed"
+            android:textSize="20dp"
+            android:layout_weight="0.5"/>
+
+        <TextView
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:text="kph"
+            android:textSize="15dp"
+            android:gravity="right"
+            android:layout_weight="0.2"/>
+
+        <Switch
+            android:id="@+id/units_speed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.1"
+            android:gravity="center"/>
+
+        <TextView
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:text="mph"
+            android:textSize="15dp"
+            android:layout_weight="0.2"
+            android:gravity="left"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layout_Connection"
+        android:layout_marginTop="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Connection"
+            android:textSize="25dp"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layout_smartwacth"
+        android:layout_marginVertical="5dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:text="\t\tSmart Watch"
+            android:textSize="20dp"
+            android:layout_weight="0.5"/>
+
+        <TextView
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:text="no"
+            android:textSize="15dp"
+            android:gravity="right"
+            android:layout_weight="0.2"/>
+
+        <Switch
+            android:id="@+id/connection"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.1"
+            android:gravity="center"/>
+
+        <TextView
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:text="yes"
+            android:textSize="15dp"
+            android:layout_weight="0.2"
+            android:gravity="left"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layout_search_smartwacth"
+        android:layout_marginVertical="5dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <SearchView
+            android:id="@+id/search_smartwatch"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layout_EMERGENCY"
+        android:layout_marginTop="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Emergency"
+            android:textSize="25dp"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layout_emergency_number"
+        android:layout_marginVertical="5dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:text="\t\tEmergency No."
+            android:textSize="20dp"
+            android:layout_weight="0.5"/>
+
+        <EditText
+            android:inputType="number"
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.3"/>
+
+        <Button
+            android:id="@+id/save"
+            android:layout_width="24dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.1"
+            android:text="Save"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="bottom"
+        android:layout_gravity="bottom">
+
+        <TextView
+            android:layout_gravity="bottom"
+            android:gravity="bottom|center_horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Filipe Macário \t filipemacario@ua.pt\nRicardo Silva \t ferreiraricardo@ua.pt" />
+    </LinearLayout>
+
+</LinearLayout>
