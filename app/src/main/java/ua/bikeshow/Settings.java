@@ -42,7 +42,7 @@ public class Settings extends AppCompatActivity {
         String s="";
 
         try {
-            FileInputStream fis = openFileInput("temperature");
+            FileInputStream fis = openFileInput("settings");
             //i = fis.read();
             while((i = fis.read())!=-1) {
                 s += ""+(char)i;

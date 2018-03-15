@@ -40,7 +40,7 @@ import java.util.TimerTask;
 
 public class mainActivity extends FragmentActivity implements IBaseGpsListener, OnMapReadyCallback {
 
-    Button emergency, start_stop;
+    Button emergency, start_stop, btn_search;
     TextView speed, bpm;
     ImageButton settings;
     MapFragment mapFragment;
@@ -66,7 +66,12 @@ public class mainActivity extends FragmentActivity implements IBaseGpsListener, 
 
         getBoundedDevice();
 
-        startConnecting();
+        if (band_found){
+            startConnecting();
+            btn_search.setVisibility(View.GONE);
+        }
+        else
+            bpm.setText("Not found");
 
         //writeDB();
 
@@ -83,10 +88,21 @@ public class mainActivity extends FragmentActivity implements IBaseGpsListener, 
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.SECOND, 10);
 
-        if(band_connected) {
-            Timer myTimer = new Timer("MyTimer", true);
-            myTimer.schedule(new MyTask(), calendar.getTime(), TIME_SEG * 1000);
+        Timer myTimer = new Timer("MyTimer", true);
+        myTimer.schedule(new MyTask(), calendar.getTime(), TIME_SEG * 1000);
+    }
+
+    void search_band(){
+        getBoundedDevice();
+        if (band_found){
+            startConnecting();
+            btn_search.setVisibility(View.GONE);
+
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.SECOND, 10);
         }
+        else
+            bpm.setText("Not found");
     }
 
     private class MyTask extends TimerTask {
@@ -104,10 +120,10 @@ public class mainActivity extends FragmentActivity implements IBaseGpsListener, 
             if (bd.getName().contains("MI Band 2")) {
                 bt_address = bd.getAddress();
                 band_found = true;
-                bpm.setText("FOUND");
+                bpm.setText("Found...");
             }
         }
-        band_found = false;
+        //band_found = false;
     }
 
     void startConnecting() {
@@ -178,6 +194,7 @@ public class mainActivity extends FragmentActivity implements IBaseGpsListener, 
     private void initilaizeComponents() {
         emergency = (Button)findViewById(R.id.button_emergency);
         start_stop = (Button)findViewById(R.id.start_stop);
+        btn_search = (Button)findViewById(R.id.btn_search);
         settings = (ImageButton)findViewById(R.id.settings);
         speed = (TextView)findViewById(R.id.speed);
         bpm = (TextView)findViewById(R.id.bpm);
@@ -218,6 +235,16 @@ public class mainActivity extends FragmentActivity implements IBaseGpsListener, 
                         start_stop.setText("START");
                         ss = false;
                     }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        btn_search.setOnClickListener(new View.OnClickListener()   {
+            public void onClick(View v)  {
+                try {
+                    search_band();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
