@@ -25,8 +25,6 @@ import android.widget.Button;
 public class Emergency extends Activity {
 
 
-
-
     final Context context = this;
     private Button button;
     Button backToMain;
@@ -52,9 +50,20 @@ public class Emergency extends Activity {
             @Override
             public void onClick(View arg0) {
 
-                Intent callIntent = new Intent(Intent.ACTION_CALL);
-                callIntent.setData(Uri.parse("tel:112"));
-                startActivity(new Intent(Intent.ACTION_DIAL, Uri.parse("tel:"+ PhoneNumber)));
+                //Intent callIntent = new Intent(Intent.ACTION_CALL);
+                //callIntent.setData(Uri.parse("tel:112"));
+              //  startActivity(new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + PhoneNumber)));
+                if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+                    // TODO: Consider calling
+                    //    ActivityCompat#requestPermissions
+                    // here to request the missing permissions, and then overriding
+                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                    //                                          int[] grantResults)
+                    // to handle the case where the user grants the permission. See the documentation
+                    // for ActivityCompat#requestPermissions for more details.
+                    return;
+                }
+                startActivity(new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + PhoneNumber)));
 
             }
 

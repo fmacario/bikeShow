@@ -1,0 +1,63 @@
+{
+  "project_info": {
+    "project_number": "628825454056",
+    "firebase_url": "https://bikeshow-2296f.firebaseio.com",
+    "project_id": "bikeshow-2296f",
+    "storage_bucket": "bikeshow-2296f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:628825454056:android:12667c3429433439",
+        "android_client_info": {
+          "package_name": "ua.bikeshow"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "628825454056-38sbbrmmspciik7ho3na429cgtrm0ml4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "ua.bikeshow",
+            "certificate_hash": "24b0585d9574d721012ba3150f8e6bc965d55b80"
+          }
+        },
+        {
+          "client_id": "628825454056-r4l81j27tsfhpub47sfnkjcg90un16hf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "ua.bikeshow",
+            "certificate_hash": "c23bffd1a2d268f57dae5fa0a752caae211dc3f9"
+          }
+        },
+        {
+          "client_id": "628825454056-a64der646vmbj2a53aqanuvpjev3es2i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD5zYeqinKjrhMgpsGITWLc5RZx7WbkXWM"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "628825454056-a64der646vmbj2a53aqanuvpjev3es2i.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
