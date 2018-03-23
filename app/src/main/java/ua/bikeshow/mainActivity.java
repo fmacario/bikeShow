@@ -20,6 +20,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -56,6 +57,7 @@ public class mainActivity extends FragmentActivity implements IBaseGpsListener, 
     TextView speed, bpm;
     ImageButton settings;
     MapFragment mapFragment;
+    ProgressBar bateria;
 
     LocationManager locationManager;
     GoogleMap googleMap = null;
@@ -131,12 +133,13 @@ public class mainActivity extends FragmentActivity implements IBaseGpsListener, 
         mapFragment.getMapAsync(this);
 
         Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.SECOND, 10);
+        calendar.add(Calendar.SECOND, 1);
 
         Timer myTimer = new Timer("MyTimer", true);
+        Timer myTimer2 = new Timer("MyTimer2", true);
         myTimer.schedule(new MyTask(), calendar.getTime(), TIME_SEG * 1000);
-
-
+        calendar.add(Calendar.SECOND, 1);
+        myTimer2.schedule(new MyTask2(), calendar.getTime(), TIME_SEG * 1000);
 
     }
 
@@ -161,7 +164,21 @@ public class mainActivity extends FragmentActivity implements IBaseGpsListener, 
                 writeDB();
             }
             if(band_connected){
+                //startScanHeartRate();
+                getBatteryStatus();
+
+            }
+
+        }
+
+    }
+
+    private class MyTask2 extends TimerTask {
+
+        public void run(){
+            if(band_connected){
                 startScanHeartRate();
+                //getBatteryStatus();
             }
 
         }
@@ -235,10 +252,11 @@ public class mainActivity extends FragmentActivity implements IBaseGpsListener, 
     }
 
     void getBatteryStatus() {
+        //Log.v("BATERIA", "onConnectionStateChange");
         BluetoothGattCharacteristic bchar = bluetoothGatt.getService(CustomBluetoothProfile.Basic.service)
                 .getCharacteristic(CustomBluetoothProfile.Basic.batteryCharacteristic);
         if (!bluetoothGatt.readCharacteristic(bchar)) {
-            Toast.makeText(this, "Failed get battery info", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this, "Failed get battery info", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -277,6 +295,7 @@ public class mainActivity extends FragmentActivity implements IBaseGpsListener, 
         speed = (TextView)findViewById(R.id.speed);
         bpm = (TextView)findViewById(R.id.bpm);
         sessions = (Button) findViewById(R.id.btn_session);
+        bateria = (ProgressBar)findViewById(R.id.bateria);
 
         mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
     }
@@ -473,6 +492,16 @@ public class mainActivity extends FragmentActivity implements IBaseGpsListener, 
             Log.v("test", "onCharacteristicRead");
             byte[] data = characteristic.getValue();
             //bpm.setText(Arrays.toString(data));
+            String s = Arrays.toString(data);
+            String[] parts = s.split(", ");
+            final String[] parts2 = parts[1].split("]");
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    bateria.setProgress(Integer.parseInt( parts2[0] ));
+                }
+            });
+
         }
 
         @Override

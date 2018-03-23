@@ -107,7 +107,7 @@
             android:maxHeight="20dp"
             android:min="0"
             android:max="100"
-            android:progress="50"
+            android:progress="0"
             android:progressTint="#00ff2f"/>
     </LinearLayout>
 
