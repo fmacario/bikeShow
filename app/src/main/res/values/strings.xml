@@ -160,7 +160,7 @@
     <string name="facebook_title_text">Facebook Login</string>
 
     <string name="emailpassword_status_fmt">Email User: %1$s (verified: %2$b)</string>
-    <string name="emailpassword_title_text">Email and Password</string>
+    <string name="emailpassword_title_text">bikeShow</string>
 
     <string name="phone_title_text">Phone Number</string>
 

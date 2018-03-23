@@ -6,15 +6,15 @@ package ua.bikeshow;
 
 public class Session {
 
-    public int velMed;
-    public int bpmMed;
+    public Double velMed;
+    public Double bpmMed;
     public int time;
 
     public Session(){
 
     }
 
-    public Session(int velMed, int bpmMed, int time){
+    public Session(Double velMed, Double bpmMed, int time){
         this.velMed=velMed;
         this.bpmMed=bpmMed;
         this.time=time;

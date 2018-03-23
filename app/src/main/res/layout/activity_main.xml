@@ -162,18 +162,6 @@
             android:layout_gravity="center_vertical"/>
     </LinearLayout>
 
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
-        <Button
-            android:text="Sessions"
-            android:id="@+id/btn_session"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_gravity="center_vertical"/>
-    </LinearLayout>
-
     <LinearLayout
         android:id="@+id/layout_MAP"
         android:layout_width="match_parent"

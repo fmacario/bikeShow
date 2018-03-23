@@ -1,5 +1,7 @@
 package ua.bikeshow;
 
+import android.*;
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
@@ -29,13 +31,13 @@ public class Emergency extends Activity {
     private Button button;
     Button backToMain;
     private String PhoneNumber = "112";
+    private static final int MY_PERMISSIONS_REQUEST = 1;
 
     public void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_emergency);
 
-        button = (Button) findViewById(R.id.buttonCall);
 
         // add PhoneStateListener
         PhoneCallListener phoneListener = new PhoneCallListener();
@@ -43,37 +45,16 @@ public class Emergency extends Activity {
                 .getSystemService(Context.TELEPHONY_SERVICE);
         telephonyManager.listen(phoneListener, PhoneStateListener.LISTEN_CALL_STATE);
 
-        // add button listener
-        button.setOnClickListener(new View.OnClickListener() {
 
-
-            @Override
-            public void onClick(View arg0) {
-
-                //Intent callIntent = new Intent(Intent.ACTION_CALL);
-                //callIntent.setData(Uri.parse("tel:112"));
-              //  startActivity(new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + PhoneNumber)));
-                if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-                    // TODO: Consider calling
-                    //    ActivityCompat#requestPermissions
-                    // here to request the missing permissions, and then overriding
-                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                    //                                          int[] grantResults)
-                    // to handle the case where the user grants the permission. See the documentation
-                    // for ActivityCompat#requestPermissions for more details.
-                    return;
-                }
-                startActivity(new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + PhoneNumber)));
-
-            }
-
-        });
         initializeComponents();
         initializeEvents();
     }
 
     private void initializeComponents() {
-        backToMain = (Button)findViewById(R.id.backToMain);
+
+        backToMain = (Button) findViewById(R.id.backToMain);
+        button = (Button) findViewById(R.id.buttonCall);
+
     }
 
     private void initializeEvents() {
@@ -86,6 +67,21 @@ public class Emergency extends Activity {
                 }
             }
         });
+
+        button.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                try {
+                    if (ActivityCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+                        ActivityCompat.requestPermissions(Emergency.this, new String[]{Manifest.permission.CALL_PHONE}, MY_PERMISSIONS_REQUEST);
+                        return;
+                    }
+                    startActivity(new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + PhoneNumber)));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
     }
 
 
