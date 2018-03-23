@@ -1,6 +1,7 @@
 package ua.bikeshow;
 
 import android.Manifest;
+import android.Manifest.permission;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
@@ -53,11 +54,13 @@ import com.google.firebase.database.ValueEventListener;
 
 public class mainActivity extends FragmentActivity implements IBaseGpsListener, OnMapReadyCallback {
 
-    Button emergency, start_stop, btn_search, sessions;
+    Button emergency, start_stop, btn_search;
     TextView speed, bpm;
     ImageButton settings;
     MapFragment mapFragment;
     ProgressBar bateria;
+
+    private static final int MY_PERMISSIONS_REQUEST = 1;
 
     LocationManager locationManager;
     GoogleMap googleMap = null;
@@ -73,8 +76,8 @@ public class mainActivity extends FragmentActivity implements IBaseGpsListener, 
     private FirebaseAuth mFirebaseAuth;
     private FirebaseUser mFirebaseUser;
     private String user;
-    private String currentSpeed="0";
-    private String currentBpm="0";
+    private String currentSpeed="0.0";
+    private String currentBpm="0.0";
     private String time;
     private int sessionMin;
     private boolean onSession = false;
@@ -120,11 +123,14 @@ public class mainActivity extends FragmentActivity implements IBaseGpsListener, 
         else
             bpm.setText("Not found");
 
-        //writeDB();
+
 
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(this, permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+        {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSIONS_REQUEST);
+            ActivityCompat.requestPermissions(this, new String[]{permission.ACCESS_COARSE_LOCATION}, MY_PERMISSIONS_REQUEST);
             return;
         }
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
@@ -159,10 +165,6 @@ public class mainActivity extends FragmentActivity implements IBaseGpsListener, 
     private class MyTask extends TimerTask {
 
         public void run(){
-            if(onSession) {
-                sessionMin++;
-                writeDB();
-            }
             if(band_connected){
                 //startScanHeartRate();
                 getBatteryStatus();
@@ -294,9 +296,7 @@ public class mainActivity extends FragmentActivity implements IBaseGpsListener, 
         settings = (ImageButton)findViewById(R.id.settings);
         speed = (TextView)findViewById(R.id.speed);
         bpm = (TextView)findViewById(R.id.bpm);
-        sessions = (Button) findViewById(R.id.btn_session);
         bateria = (ProgressBar)findViewById(R.id.bateria);
-
         mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
     }
 
@@ -346,7 +346,7 @@ public class mainActivity extends FragmentActivity implements IBaseGpsListener, 
                     else{
                         start_stop.setText("START");
                         onSession=false;
-                        int[] i=calculateResults();
+                        Double[] i= calculateResults();
                         Session aux = new Session(i[0],i[1],sessionMin-1);
                         writeSessionDB(aux);
                         ss = false;
@@ -367,32 +367,21 @@ public class mainActivity extends FragmentActivity implements IBaseGpsListener, 
             }
         });
 
-        sessions.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                try {
-                    Intent i = new Intent(getApplicationContext(), SessionsActivity.class);
-                    startActivity(i);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-            }
-        });
     }
 
-    private int[] calculateResults(){
-        int[] medias =new int[2];
-        int aux=0;
-        int aux1=0;
+    private Double[] calculateResults(){
+        Double[] medias =new Double[2];
+        Double aux=0.0;
+        Double aux1=0.0;
+
         for(int i=0; i<speeds.size();i++) {
-            aux+=Integer.parseInt(speeds.get(i));
+            aux+=Double.parseDouble(speeds.get(i));
         }
-        medias[0]=aux/speeds.size()-1;
+        medias[0]=aux/speeds.size();
         for(int j=0; j<bpms.size();j++) {
-            aux1+=Integer.parseInt(bpms.get(j));
+            aux1+=Double.parseDouble(bpms.get(j));
         }
-        medias[1]=aux1/bpms.size()-1;
+        medias[1]=aux1/bpms.size();
         return medias;
     }
 
@@ -421,7 +410,7 @@ public class mainActivity extends FragmentActivity implements IBaseGpsListener, 
     @Override
     public void onMapReady(GoogleMap map) {
         googleMap = map;
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(this, permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
         googleMap.setMyLocationEnabled(true);

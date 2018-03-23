@@ -221,6 +221,33 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/session"
+        android:layout_marginVertical="5dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <Button
+            android:id="@+id/btn_sess"
+            android:layout_width="24dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.1"
+            android:text="Sessions"/>
+    </LinearLayout>
+
+<LinearLayout
+    android:id="@+id/signout"
+    android:layout_marginVertical="5dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+    <Button
+        android:id="@+id/btn_sign"
+        android:layout_width="24dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.1"
+        android:text="Sign Out"/>
+</LinearLayout>
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="bottom"
