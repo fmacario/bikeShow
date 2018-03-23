@@ -30,17 +30,29 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Formatter;
 import java.util.Locale;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+
+
 public class mainActivity extends FragmentActivity implements IBaseGpsListener, OnMapReadyCallback {
 
-    Button emergency, start_stop, btn_search;
+    Button emergency, start_stop, btn_search, sessions;
     TextView speed, bpm;
     ImageButton settings;
     MapFragment mapFragment;
@@ -56,12 +68,45 @@ public class mainActivity extends FragmentActivity implements IBaseGpsListener, 
     String speed_units = "km/h", bt_address;
     boolean ss = false, isListeningHeartRate = false, band_found = false, band_connected = false;
 
+    private FirebaseAuth mFirebaseAuth;
+    private FirebaseUser mFirebaseUser;
+    private String user;
+    private String currentSpeed="0";
+    private String currentBpm="0";
+    private String time;
+    private int sessionMin;
+    private boolean onSession = false;
+    static boolean flag = false;
+    private ArrayList<String> speeds =new ArrayList<String>();
+    private ArrayList<String> bpms = new ArrayList<String>();
+
+    Timer myTimer1 = new Timer("MyTimer1", true);
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
+        if(!flag){
+            FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+            flag = true;
+        }
         setContentView(R.layout.activity_main);
+
+        mFirebaseAuth = FirebaseAuth.getInstance();
+        mFirebaseUser = mFirebaseAuth.getCurrentUser();
+
+        if(mFirebaseUser == null){
+           startActivity(new Intent(mainActivity.this, Login.class));
+            finish();
+            return;
+        }
+
+        user = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        initilaizeComponents();
+        initializeComponents();
         initializeEvents();
 
         getBoundedDevice();
@@ -90,6 +135,9 @@ public class mainActivity extends FragmentActivity implements IBaseGpsListener, 
 
         Timer myTimer = new Timer("MyTimer", true);
         myTimer.schedule(new MyTask(), calendar.getTime(), TIME_SEG * 1000);
+
+
+
     }
 
     void search_band(){
@@ -108,8 +156,29 @@ public class mainActivity extends FragmentActivity implements IBaseGpsListener, 
     private class MyTask extends TimerTask {
 
         public void run(){
-            if(band_connected)
+            if(onSession) {
+                sessionMin++;
+                writeDB();
+            }
+            if(band_connected){
                 startScanHeartRate();
+            }
+
+        }
+
+    }
+
+    private class MyTask1 extends TimerTask {
+
+        public void run(){
+            if(onSession==true) {
+                writeDB();
+                speeds.add(currentSpeed);
+                bpms.add(currentBpm);
+                sessionMin++;
+            }
+
+
         }
 
     }
@@ -177,27 +246,38 @@ public class mainActivity extends FragmentActivity implements IBaseGpsListener, 
         // Write a message to the database
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference root = database.getReference(); //Getting root reference
-        DatabaseReference session = root.child("session");
+        DatabaseReference userDB = root.child("values").child(user);
 
-        DatabaseReference inicio = session.child("2").child("inicio");
-        DatabaseReference fim = session.child("2").child("fim");
-        inicio.setValue("Ramona");
-        fim.setValue("UA");
+        DatabaseReference session = userDB.child(time);
+        String aux = Integer.toString(sessionMin);
+        DatabaseReference sessionMinutes = session.child(aux);
 
-        DatabaseReference vel = session.child("2").child("min").child("1").child("vel");
-        DatabaseReference bat = session.child("2").child("min").child("1").child("bat");
-        //DatabaseReference bat = session.child("2").child("min").child("1").child("bat");
-        vel.setValue(40);
-        bat.setValue(60);
+       // int aux1 = Integer.parseInt(currentSpeed);
+        DatabaseReference vel = sessionMinutes.child("vel");
+        //int aux2 = Integer.parseInt(currentBpm);
+        DatabaseReference bat = sessionMinutes.child("bat");
+
+        vel.setValue(currentSpeed);
+        bat.setValue(currentBpm);
     }
 
-    private void initilaizeComponents() {
+    private void writeSessionDB(Session aux){
+        FirebaseDatabase dataBase = FirebaseDatabase.getInstance();
+        DatabaseReference sess = dataBase.getReference().child("infos").child(user).child(time);
+        sess.setValue(aux);
+
+
+    }
+
+    private void initializeComponents() {
         emergency = (Button)findViewById(R.id.button_emergency);
         start_stop = (Button)findViewById(R.id.start_stop);
         btn_search = (Button)findViewById(R.id.btn_search);
         settings = (ImageButton)findViewById(R.id.settings);
         speed = (TextView)findViewById(R.id.speed);
         bpm = (TextView)findViewById(R.id.bpm);
+        sessions = (Button) findViewById(R.id.btn_session);
+
         mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
     }
 
@@ -229,10 +309,27 @@ public class mainActivity extends FragmentActivity implements IBaseGpsListener, 
                 try {
                     if ( ss == false ){
                         start_stop.setText("STOP");
+                        Date date = Calendar.getInstance().getTime();
+                        String year = (String) android.text.format.DateFormat.format("yyyy", date);
+                        String  month = (String) android.text.format.DateFormat.format("MM", date);
+                        String day = (String) android.text.format.DateFormat.format("dd", date);
+                        String  hour = (String) android.text.format.DateFormat.format("HH", date);
+                        String min = (String) android.text.format.DateFormat.format("mm", date);
+                        String sec = (String) android.text.format.DateFormat.format("ss", date);
+                        time = year + month + day + hour + min + sec;
+                        onSession=true;
+                        sessionMin=0;
+                        Calendar calendar = Calendar.getInstance();
+                        calendar.add(Calendar.SECOND, 10);
+                        myTimer1.schedule(new MyTask1(), calendar.getTime(), TIME_SEG * 1000);
                         ss = true;
                     }
                     else{
                         start_stop.setText("START");
+                        onSession=false;
+                        int[] i=calculateResults();
+                        Session aux = new Session(i[0],i[1],sessionMin-1);
+                        writeSessionDB(aux);
                         ss = false;
                     }
                 } catch (Exception e) {
@@ -250,6 +347,34 @@ public class mainActivity extends FragmentActivity implements IBaseGpsListener, 
                 }
             }
         });
+
+        sessions.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    Intent i = new Intent(getApplicationContext(), SessionsActivity.class);
+                    startActivity(i);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+            }
+        });
+    }
+
+    private int[] calculateResults(){
+        int[] medias =new int[2];
+        int aux=0;
+        int aux1=0;
+        for(int i=0; i<speeds.size();i++) {
+            aux+=Integer.parseInt(speeds.get(i));
+        }
+        medias[0]=aux/speeds.size()-1;
+        for(int j=0; j<bpms.size();j++) {
+            aux1+=Integer.parseInt(bpms.get(j));
+        }
+        medias[1]=aux1/bpms.size()-1;
+        return medias;
     }
 
     private void updateSpeed(CLocation location) {
@@ -271,6 +396,7 @@ public class mainActivity extends FragmentActivity implements IBaseGpsListener, 
         }
         */
         speed.setText(strCurrentSpeed + " " + speed_units);
+        currentSpeed = strCurrentSpeed;
     }
 
     @Override
@@ -367,6 +493,7 @@ public class mainActivity extends FragmentActivity implements IBaseGpsListener, 
                 @Override
                 public void run() {
                     bpm.setText(parts2[0] + " BPM");
+                    currentBpm=parts2[0];
                 }
             });
         }
