@@ -50,7 +50,11 @@
         <activity
             android:name=".Login"
             android:label="@string/title_activity_login" />
-        <activity android:name=".SessionsActivity"></activity>
+        <activity android:name=".SessionsActivity" />
+        <activity android:name=".SessionGraphActivity" />
+        <activity android:name=".GraphMenu" />
+        <activity android:name=".VelGraphActivity" />
+        <activity android:name=".BatVelGraphActivity"></activity>
     </application>
 
 </manifest>

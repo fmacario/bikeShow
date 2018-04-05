@@ -1,12 +1,15 @@
 package ua.bikeshow;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
 import android.widget.ListView;
@@ -29,6 +32,7 @@ public class SessionsActivity extends AppCompatActivity {
     private String user = FirebaseAuth.getInstance().getCurrentUser().getUid();
     FirebaseDatabase database = FirebaseDatabase.getInstance();
     DatabaseReference sessionRef = database.getReference().child("infos").child(user);
+    private String[] graphSess;
 
 
     @Override
@@ -44,6 +48,17 @@ public class SessionsActivity extends AppCompatActivity {
         final ListView listview = (ListView) findViewById(R.id.list_sessions_history);
         listview.setAdapter(adapter);
         listSessions(year, month, day);
+        listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent(getApplicationContext(), GraphMenu.class);
+                intent.putExtra("session", graphSess[position]);
+                startActivity(intent);
+
+                }
+
+        });
+
     }
 
     @Override
@@ -89,9 +104,14 @@ public class SessionsActivity extends AppCompatActivity {
 
     private void listSessions(final String year, final String month, final String day){
         listSession.clear();
+
+
+
         sessionRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                graphSess=new String[20];
+                int i=0;
                 String date=year+month+day;
                 for(DataSnapshot singleSnap : dataSnapshot.getChildren()){
                     String entry = singleSnap.getKey();
@@ -102,8 +122,10 @@ public class SessionsActivity extends AppCompatActivity {
                     String tmp_day=tmp_time.substring(7,8)+" ";
                     String tmp_hour = tmp_time.substring(8,10)+"h";
                     String tmp_min = tmp_time.substring(10,12)+"m";
-                    tmp_time = tmp_year+tmp_month+tmp_day+tmp_hour + tmp_min;
-                    listSession.add(tmp_time+"\n"+singleSnap.getValue().toString());
+                    String tmp_time1 = tmp_year+tmp_month+tmp_day+tmp_hour + tmp_min;
+                    listSession.add(tmp_time1+"\n"+singleSnap.getValue().toString());
+                    graphSess[i]=tmp_time;
+                    i++;
                     //String session = organizeSession(singleSnap.getValue().toString());
                 }
                 adapter.notifyDataSetChanged();
