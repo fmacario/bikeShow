@@ -11,6 +11,7 @@ import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
@@ -29,6 +30,10 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.UiSettings;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -60,8 +65,6 @@ public class mainActivity extends FragmentActivity implements IBaseGpsListener, 
     MapFragment mapFragment;
     ProgressBar bateria;
 
-    private static final int MY_PERMISSIONS_REQUEST = 1;
-
     LocationManager locationManager;
     GoogleMap googleMap = null;
 
@@ -84,6 +87,10 @@ public class mainActivity extends FragmentActivity implements IBaseGpsListener, 
     static boolean flag = false;
     private ArrayList<String> speeds =new ArrayList<String>();
     private ArrayList<String> bpms = new ArrayList<String>();
+    public static LatLng latlng;
+
+    final Context context = this;
+    private static final int MY_PERMISSIONS_REQUEST = 1;
 
     Timer myTimer1 = new Timer("MyTimer1", true);
 
@@ -91,6 +98,21 @@ public class mainActivity extends FragmentActivity implements IBaseGpsListener, 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(mainActivity.this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSIONS_REQUEST);
+        }
+
+        SharedPreferences settings = getSharedPreferences("settings", 0);
+        String settings_speed_units = settings.getString("speed", " ");
+        int emergency_number = settings.getInt("emergency_number", 0);
+
+        if ( settings_speed_units.equalsIgnoreCase(" " ) ){
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putString("speed", "km/h");
+            editor.apply();
+            speed_units = "km/h";
+        }else
+            speed_units = settings_speed_units;
 
         if(!flag){
             FirebaseDatabase.getInstance().setPersistenceEnabled(true);
@@ -392,6 +414,8 @@ public class mainActivity extends FragmentActivity implements IBaseGpsListener, 
         {
             location.setUnits( speed_units );
             nCurrentSpeed = location.getSpeed();
+            latlng = new LatLng(location.getLatitude(), location.getLongitude());
+            googleMap.moveCamera( CameraUpdateFactory.newLatLng( latlng ) );
         }
 
         Formatter fmt = new Formatter(new StringBuilder());
@@ -415,6 +439,25 @@ public class mainActivity extends FragmentActivity implements IBaseGpsListener, 
         }
         googleMap.setMyLocationEnabled(true);
 
+        UiSettings uiSettings = googleMap.getUiSettings();
+        uiSettings.setCompassEnabled(true);
+        uiSettings.setMapToolbarEnabled(true);
+
+        googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng point) {
+                googleMap.clear();
+
+                //Log.d("DEBUG","Map clicked [" + point.latitude + " / " + point.longitude + "]");
+                googleMap.addMarker(new MarkerOptions()
+                        .position(new LatLng(point.latitude, point.longitude))
+                        .title("Destino"));
+
+                //Do your stuff with LatLng here
+                //Then pass LatLng to other activity
+            }
+        });
+
         googleMap.animateCamera( CameraUpdateFactory.zoomTo( 17.0f ) );
 
     }
@@ -425,6 +468,7 @@ public class mainActivity extends FragmentActivity implements IBaseGpsListener, 
         {
             CLocation myLocation = new CLocation(location, speed_units);
             this.updateSpeed(myLocation);
+
         }
     }
 

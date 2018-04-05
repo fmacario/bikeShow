@@ -37,43 +37,6 @@
             android:textSize="25dp"/>
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/layout_UNITS1"
-        android:layout_marginVertical="5dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="100dp"
-            android:layout_height="wrap_content"
-            android:text="\t\tTemperature"
-            android:textSize="20dp"
-            android:layout_weight="0.5"/>
-
-        <TextView
-            android:layout_width="50dp"
-            android:layout_height="wrap_content"
-            android:text="ºC"
-            android:textSize="15dp"
-            android:gravity="right"
-            android:layout_weight="0.2"/>
-
-        <Switch
-            android:id="@+id/units_temperature"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.1"
-            android:gravity="center"/>
-
-        <TextView
-            android:layout_width="50dp"
-            android:layout_height="wrap_content"
-            android:text="ºF"
-            android:textSize="15dp"
-            android:layout_weight="0.2"
-            android:gravity="left"/>
-    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/layout_UNITS2"
@@ -113,70 +76,6 @@
             android:gravity="left"/>
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/layout_Connection"
-        android:layout_marginTop="10dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Connection"
-            android:textSize="25dp"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/layout_smartwacth"
-        android:layout_marginVertical="5dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="100dp"
-            android:layout_height="wrap_content"
-            android:text="\t\tSmart Watch"
-            android:textSize="20dp"
-            android:layout_weight="0.5"/>
-
-        <TextView
-            android:layout_width="50dp"
-            android:layout_height="wrap_content"
-            android:text="no"
-            android:textSize="15dp"
-            android:gravity="right"
-            android:layout_weight="0.2"/>
-
-        <Switch
-            android:id="@+id/connection"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.1"
-            android:gravity="center"/>
-
-        <TextView
-            android:layout_width="50dp"
-            android:layout_height="wrap_content"
-            android:text="yes"
-            android:textSize="15dp"
-            android:layout_weight="0.2"
-            android:gravity="left"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/layout_search_smartwacth"
-        android:layout_marginVertical="5dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <SearchView
-            android:id="@+id/search_smartwatch"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
-    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/layout_EMERGENCY"
@@ -207,17 +106,30 @@
             android:layout_weight="0.5"/>
 
         <EditText
+            android:id="@+id/text_number"
             android:inputType="number"
             android:layout_width="50dp"
             android:layout_height="wrap_content"
             android:layout_weight="0.3"/>
+    </LinearLayout>
 
+    <LinearLayout
+        android:layout_marginVertical="5dp"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:orientation="horizontal">
         <Button
             android:id="@+id/save"
-            android:layout_width="24dp"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
             android:layout_weight="0.1"
             android:text="Save"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp">
     </LinearLayout>
 
     <LinearLayout
@@ -237,8 +149,10 @@
 <LinearLayout
     android:id="@+id/signout"
     android:layout_marginVertical="5dp"
-    android:layout_width="match_parent"
+    android:layout_marginBottom="100dp"
+    android:layout_width="150dp"
     android:layout_height="wrap_content"
+    android:layout_gravity="center"
     android:orientation="horizontal">
     <Button
         android:id="@+id/btn_sign"
@@ -246,12 +160,14 @@
         android:layout_height="wrap_content"
         android:layout_weight="0.1"
         android:text="Sign Out"/>
+
 </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="bottom"
-        android:layout_gravity="bottom">
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="10dp">
 
         <TextView
             android:layout_gravity="bottom"

@@ -8,7 +8,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.Switch;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -24,6 +26,9 @@ public class Settings extends AppCompatActivity {
     Button save;
     Button signout;
     Button sessions;
+    Switch switch_speed;
+    EditText number;
+    SharedPreferences settings;
     FirebaseAuth mAuth = FirebaseAuth.getInstance();
     FirebaseUser currentUser = mAuth.getCurrentUser();
 
@@ -32,38 +37,20 @@ public class Settings extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
-        String FILENAME = "hello_file";
-        String string = "hello world!";
-
-
-        try {
-            FileOutputStream fos = openFileOutput("temperature", Context.MODE_PRIVATE);
-            fos.write(string.getBytes());
-            fos.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        int i=0;
-        char c;
-        String s="";
-
-        try {
-            FileInputStream fis = openFileInput("settings");
-            //i = fis.read();
-            while((i = fis.read())!=-1) {
-                s += ""+(char)i;
-            }
-            fis.close();
-            Log.d("TESTE", s);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        settings = getSharedPreferences("settings", 0);
+        String speed_units = settings.getString("speed", " ");
+        int settings_number = settings.getInt("emergency_number", 0);
 
         initilizeComponents();
         initializeEvents();
+
+        if ( speed_units.equalsIgnoreCase("km/h") )
+            switch_speed.setChecked(false);
+        else
+            switch_speed.setChecked(true);
+
+        if ( settings_number != 0 )
+            number.setText( String.valueOf(settings_number));
     }
 
     private void initilizeComponents() {
@@ -71,6 +58,8 @@ public class Settings extends AppCompatActivity {
         save = (Button)findViewById(R.id.save);
         signout = (Button) findViewById(R.id.btn_sign);
         sessions = (Button) findViewById(R.id.btn_sess);
+        switch_speed = (Switch) findViewById(R.id.units_speed);
+        number = (EditText) findViewById(R.id.text_number);
     }
 
     private void initializeEvents() {
@@ -87,7 +76,19 @@ public class Settings extends AppCompatActivity {
         save.setOnClickListener(new View.OnClickListener()   {
             public void onClick(View v)  {
                 try {
-                    //save emergency number to db
+                    SharedPreferences.Editor editor = settings.edit();
+
+                    if ( !switch_speed.isChecked() )
+                        editor.putString("speed", "km/h");
+                    else
+                        editor.putString("speed", "m/h");
+
+                    if ( number.getText().toString().length() != 0 )
+                        editor.putInt("emergency_number", Integer.parseInt( number.getText().toString() ) );
+                    else
+                        editor.putInt("emergency_number", 0);
+
+                    editor.apply();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

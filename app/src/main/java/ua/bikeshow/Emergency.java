@@ -4,8 +4,10 @@ import android.*;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.support.v4.app.ActivityCompat;
@@ -14,11 +16,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.telephony.PhoneStateListener;
+import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
+
+import com.google.android.gms.maps.model.LatLng;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -32,6 +38,7 @@ public class Emergency extends Activity {
     Button backToMain;
     private String PhoneNumber = "112";
     private static final int MY_PERMISSIONS_REQUEST = 1;
+    SharedPreferences settings;
 
     public void onCreate(Bundle savedInstanceState) {
 
@@ -70,12 +77,40 @@ public class Emergency extends Activity {
 
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+                LatLng latlng = mainActivity.latlng;
                 try {
                     if (ActivityCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
                         ActivityCompat.requestPermissions(Emergency.this, new String[]{Manifest.permission.CALL_PHONE}, MY_PERMISSIONS_REQUEST);
-                        return;
+                    }
+
+                    if (ActivityCompat.checkSelfPermission(context, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
+                        ActivityCompat.requestPermissions(Emergency.this, new String[]{Manifest.permission.SEND_SMS}, MY_PERMISSIONS_REQUEST);
+                    }
+
+                    SmsManager sms = SmsManager.getDefault();
+
+                    settings = getSharedPreferences("settings", 0);
+                    int settings_number = settings.getInt("emergency_number", 0);
+
+                    String msg;
+
+                    try{
+                        msg = "Tive um acidente! Coordenadas: \n" + latlng.toString();
+                    }catch ( Exception e){
+                        msg = "Tive um acidente! Coordenadas: \n" ;
+                    }
+
+                    if ( settings_number != 0 && settings_number+"".length() != 0 ) {
+                        try {
+                            sms.sendTextMessage(settings_number + "", null, msg, null, null);
+                            Toast toast = Toast.makeText(context, "Message sent.", Toast.LENGTH_SHORT);
+                            toast.show();
+                        } catch (Exception e) {
+
+                        }
                     }
                     startActivity(new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + PhoneNumber)));
+
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
