@@ -15,6 +15,11 @@
         android:gravity="center_horizontal"
         android:orientation="vertical">
 
+        <ImageView
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+
+            app:srcCompat="@mipmap/ic_launcher_foreground" />
 
         <TextView
             android:id="@+id/title_text"
@@ -24,6 +29,8 @@
             android:text="@string/emailpassword_title_text"
             android:textAlignment="center"
             android:theme="@style/ThemeOverlay.MyTitleText" />
+
+
 
 
     </LinearLayout>
