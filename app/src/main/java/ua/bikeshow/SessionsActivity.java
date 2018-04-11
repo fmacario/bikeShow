@@ -23,6 +23,8 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Formatter;
+import java.util.Locale;
 
 
 public class SessionsActivity extends AppCompatActivity {
@@ -54,6 +56,7 @@ public class SessionsActivity extends AppCompatActivity {
                 Intent intent = new Intent(getApplicationContext(), GraphMenu.class);
                 intent.putExtra("session", graphSess[position]);
                 startActivity(intent);
+                finish();
 
                 }
 
@@ -123,10 +126,14 @@ public class SessionsActivity extends AppCompatActivity {
                     String tmp_hour = tmp_time.substring(8,10)+"h";
                     String tmp_min = tmp_time.substring(10,12)+"m";
                     String tmp_time1 = tmp_year+tmp_month+tmp_day+tmp_hour + tmp_min;
-                    listSession.add(tmp_time1+"\n"+singleSnap.getValue().toString());
+                    String tmp_vel = singleSnap.child("velMed").getValue().toString();
+                    String tmp_bpm = singleSnap.child("bpmMed").getValue().toString();
+                    String tmp_t = singleSnap.child("time").getValue().toString();
+                    String session = organizeSession(tmp_vel, tmp_bpm, tmp_t);
+                    listSession.add(tmp_time1+"\n"+session);
                     graphSess[i]=tmp_time;
                     i++;
-                    //String session = organizeSession(singleSnap.getValue().toString());
+
                 }
                 adapter.notifyDataSetChanged();
             }
@@ -138,29 +145,23 @@ public class SessionsActivity extends AppCompatActivity {
         });
     }
 
-    private String organizeSession(String session){
-        char[] sess = session.toCharArray();
-        boolean flag = false;
-        String tmp_sess = "";
-        String vel = "";
-        String bpm = "";
-        String temp = "";
-        int j = 1;
-        for(int i = 1; i<sess.length; i++){
-            if(sess[i]=='='){
-                vel = session.substring(j,i);
-                j=i+1;
-                for(int z = j; z<sess.length;z++){
-                    if(sess[z]=='='){
+    private String organizeSession(String vel, String bpm, String time){
+        Double vel1= Double.parseDouble(vel);
 
-                    }
-                }
+        Double bpm1 = Double.parseDouble(bpm);
+        Formatter fmt = new Formatter(new StringBuilder());
+        fmt.format(Locale.US, "%5.1f", vel1);
+        vel = fmt.toString();
+        Formatter fmt1 = new Formatter(new StringBuilder());
+        fmt1.format(Locale.US, "%5.1f", bpm1);
+        bpm = fmt1.toString();
+        //vel = vel.substring(0,);
+      //  bpm = bpm.substring(0,5);
+        String tmp_sess="Velocidade Média: "+vel+" km/h"+"\n"+"Média Batimentos: "+bpm+" bpm"+"\n"+"Tempo: "+time+" min";
 
 
-            }
-        }
 
         return tmp_sess;
     }
-    }
+}
 
