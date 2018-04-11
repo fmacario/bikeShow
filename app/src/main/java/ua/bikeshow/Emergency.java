@@ -37,7 +37,7 @@ public class Emergency extends Activity {
     private Button button;
     Button backToMain;
     private String PhoneNumber = "112";
-    private static final int MY_PERMISSIONS_REQUEST = 1;
+    private static final int MY_PERMISSIONS_REQUEST = 100;
     SharedPreferences settings;
 
     public void onCreate(Bundle savedInstanceState) {
@@ -45,6 +45,7 @@ public class Emergency extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_emergency);
 
+        askForPermission();
 
         // add PhoneStateListener
         PhoneCallListener phoneListener = new PhoneCallListener();
@@ -55,6 +56,11 @@ public class Emergency extends Activity {
 
         initializeComponents();
         initializeEvents();
+    }
+
+    private void askForPermission() {
+        String[] permissions = new String[]{Manifest.permission.SEND_SMS, Manifest.permission.CALL_PHONE};
+        ActivityCompat.requestPermissions(Emergency.this, permissions, MY_PERMISSIONS_REQUEST);
     }
 
     private void initializeComponents() {
@@ -79,11 +85,14 @@ public class Emergency extends Activity {
             public void onClick(View v) {
                 LatLng latlng = mainActivity.latlng;
                 try {
-                    if (ActivityCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+
+                    if (ActivityCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
+                        ActivityCompat.requestPermissions(Emergency.this, new String[]{Manifest.permission.CALL_PHONE, Manifest.permission.SEND_SMS}, MY_PERMISSIONS_REQUEST);
+                    }
+                    else if (ActivityCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
                         ActivityCompat.requestPermissions(Emergency.this, new String[]{Manifest.permission.CALL_PHONE}, MY_PERMISSIONS_REQUEST);
                     }
-
-                    if (ActivityCompat.checkSelfPermission(context, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
+                    else if (ActivityCompat.checkSelfPermission(context, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
                         ActivityCompat.requestPermissions(Emergency.this, new String[]{Manifest.permission.SEND_SMS}, MY_PERMISSIONS_REQUEST);
                     }
 

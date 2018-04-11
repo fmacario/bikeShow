@@ -1,6 +1,7 @@
 package ua.bikeshow;
 
 import android.*;
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -28,13 +29,17 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
 
     private static final String TAG = "EmailPassword";
 
+
     private TextView mStatusTextView;
     private TextView mDetailTextView;
     private EditText mEmailField;
     private EditText mPasswordField;
 
     final Context context = this;
-    private static final int MY_PERMISSIONS_REQUEST = 1;
+    private static final int MY_PERMISSIONS_REQUEST_LOCATION = 1;
+    private static final int MY_PERMISSIONS_REQUEST_CALL_PHONE = 2;
+    private static final int MY_PERMISSIONS_REQUEST_SEND_SMS = 3;
+    private static final int MY_PERMISSIONS_REQUEST = 100;
 
     // [START declare_auth]
     private FirebaseAuth mAuth;
@@ -45,21 +50,7 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(Login.this, new String[]{android.Manifest.permission.CALL_PHONE}, MY_PERMISSIONS_REQUEST);
-        }
-
-        if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(Login.this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSIONS_REQUEST);
-        }
-
-        if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(Login.this, new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION}, MY_PERMISSIONS_REQUEST);
-        }
-
-        if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(Login.this, new String[]{android.Manifest.permission.SEND_SMS}, MY_PERMISSIONS_REQUEST);
-        }
+        askForPermission();
 
         // Views
 
@@ -75,6 +66,30 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
         // [START initialize_auth]
         mAuth = FirebaseAuth.getInstance();
         // [END initialize_auth]
+    }
+
+    private void askForPermission() {
+        String[] permissions = new String[]{Manifest.permission.SEND_SMS, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.CALL_PHONE};
+        ActivityCompat.requestPermissions(Login.this, permissions, MY_PERMISSIONS_REQUEST);
+    }
+
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults){
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST:
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Log.d("teste", "cheguei aqui 1");
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+
+                } else {
+                    Log.d("teste", "cheguei aqui 2");
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return;
+        }
+
     }
 
     // [START on_start_check_user]
@@ -150,7 +165,6 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
 
                         // [START_EXCLUDE]
                         if (!task.isSuccessful()) {
-                            mStatusTextView.setText(R.string.auth_failed);
                         }
 
                         // [END_EXCLUDE]

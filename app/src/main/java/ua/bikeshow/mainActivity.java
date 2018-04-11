@@ -90,17 +90,13 @@ public class mainActivity extends FragmentActivity implements IBaseGpsListener, 
     public static LatLng latlng;
 
     final Context context = this;
-    private static final int MY_PERMISSIONS_REQUEST = 1;
+    private static final int MY_PERMISSIONS_REQUEST = 100;
 
     Timer myTimer1 = new Timer("MyTimer1", true);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(mainActivity.this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSIONS_REQUEST);
-        }
 
         SharedPreferences settings = getSharedPreferences("settings", 0);
         String settings_speed_units = settings.getString("speed", " ");
@@ -152,7 +148,6 @@ public class mainActivity extends FragmentActivity implements IBaseGpsListener, 
         if (ActivityCompat.checkSelfPermission(this, permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
         {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSIONS_REQUEST);
-            ActivityCompat.requestPermissions(this, new String[]{permission.ACCESS_COARSE_LOCATION}, MY_PERMISSIONS_REQUEST);
             return;
         }
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
@@ -169,6 +164,11 @@ public class mainActivity extends FragmentActivity implements IBaseGpsListener, 
         calendar.add(Calendar.SECOND, 1);
         myTimer2.schedule(new MyTask2(), calendar.getTime(), TIME_SEG * 1000);
 
+    }
+
+    private void askForPermission() {
+        String[] permissions = new String[]{Manifest.permission.SEND_SMS, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.CALL_PHONE};
+        ActivityCompat.requestPermissions(mainActivity.this, permissions, MY_PERMISSIONS_REQUEST);
     }
 
     void search_band(){
@@ -319,6 +319,7 @@ public class mainActivity extends FragmentActivity implements IBaseGpsListener, 
         speed = (TextView)findViewById(R.id.speed);
         bpm = (TextView)findViewById(R.id.bpm);
         bateria = (ProgressBar)findViewById(R.id.bateria);
+        bateria.setScaleY(6f);
         mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
     }
 
@@ -337,6 +338,11 @@ public class mainActivity extends FragmentActivity implements IBaseGpsListener, 
         emergency.setOnClickListener(new View.OnClickListener()   {
             public void onClick(View v)  {
                 try {
+
+                    if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+                        ActivityCompat.requestPermissions(mainActivity.this, new String[]{android.Manifest.permission.CALL_PHONE}, MY_PERMISSIONS_REQUEST);
+                    }
+
                     Intent i = new Intent(getApplicationContext(), Emergency.class);
                     startActivity(i);
                 } catch (Exception e) {
@@ -390,6 +396,8 @@ public class mainActivity extends FragmentActivity implements IBaseGpsListener, 
         });
 
     }
+
+
 
     private Double[] calculateResults(){
         Double[] medias =new Double[2];
