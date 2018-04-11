@@ -49,7 +49,8 @@ public class BatVelGraphActivity extends AppCompatActivity {
                     String bat1 = singleSnap.child("bat").getValue().toString();
                     Double aux1= Double.parseDouble(vel);
                     int aux2 = aux1.intValue();
-                    int bat = Integer.parseInt(bat1);
+                    Double aux = Double.parseDouble(bat1);
+                    int bat = aux.intValue();
                     data.put(aux2, bat);
 
                 }

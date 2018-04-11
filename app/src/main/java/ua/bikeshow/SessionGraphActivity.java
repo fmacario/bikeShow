@@ -50,7 +50,8 @@ public class SessionGraphActivity extends AppCompatActivity {
                 for(DataSnapshot singleSnap : dataSnapshot.getChildren()){
                     String min = singleSnap.getKey();
                     String bat1 = singleSnap.child("bat").getValue().toString();
-                    int bat = Integer.parseInt(bat1);
+                    Double aux = Double.parseDouble(bat1);
+                    int bat = aux.intValue();
                     data.put(min, bat);
 
                 }
