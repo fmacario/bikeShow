@@ -26,6 +26,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
@@ -34,6 +36,7 @@ import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -94,6 +97,9 @@ public class mainActivity extends FragmentActivity implements IBaseGpsListener, 
 
     Timer myTimer1 = new Timer("MyTimer1", true);
 
+    private FusedLocationProviderClient mFusedLocationClient;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -150,6 +156,7 @@ public class mainActivity extends FragmentActivity implements IBaseGpsListener, 
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSIONS_REQUEST);
             return;
         }
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
         this.updateSpeed(null);
 
@@ -163,6 +170,20 @@ public class mainActivity extends FragmentActivity implements IBaseGpsListener, 
         myTimer.schedule(new MyTask(), calendar.getTime(), TIME_SEG * 1000);
         calendar.add(Calendar.SECOND, 1);
         myTimer2.schedule(new MyTask2(), calendar.getTime(), TIME_SEG * 1000);
+
+
+        mFusedLocationClient.getLastLocation()
+                .addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        latlng = new LatLng(location.getLatitude(), location.getLongitude());
+                        // Got last known location. In some rare situations this can be null.
+                        if (location != null) {
+                            // Logic to handle location object
+                        }
+                    }
+                });
+
 
     }
 
